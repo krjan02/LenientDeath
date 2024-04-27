@@ -43,8 +43,7 @@ public record DeathRecord(Inventory inventory,
             if (trinketsParsed.result().isPresent()) {
                 trinkets = trinketsParsed.result();
             } else {
-                return trinketsParsed.get()
-                        .right()
+                return trinketsParsed.error()
                         .map(partial -> DataResult.<DeathRecord>error(() -> "Could not parse trinkets inventory: " + partial.message()))
                         .orElseThrow();
             }
@@ -57,8 +56,7 @@ public record DeathRecord(Inventory inventory,
             if (timeOfDeathParsed.result().isPresent()) {
                 timeOfDeath = timeOfDeathParsed.result().get();
             } else {
-                return timeOfDeathParsed.get()
-                        .right()
+                return timeOfDeathParsed.error()
                         .map(partial -> DataResult.<DeathRecord>error(() -> "Could not parse time of death: " + partial.message()))
                         .orElseThrow();
             }
@@ -67,7 +65,7 @@ public record DeathRecord(Inventory inventory,
         }
 
         if (tag.contains(DEATH_MESSAGE, Tag.TAG_STRING)) {
-            deathMessage = Component.Serializer.fromJson(tag.getString(DEATH_MESSAGE));
+            deathMessage = Component.Serializer.fromJson(tag.getString(DEATH_MESSAGE), player.server.registryAccess());
             if (deathMessage == null) return DataResult.error(() -> "Could not parse death message");
         } else {
             return DataResult.error(() -> "No death message");
@@ -78,8 +76,7 @@ public record DeathRecord(Inventory inventory,
             if (locationParsed.result().isPresent()) {
                 location = locationParsed.result().get();
             } else {
-                return locationParsed.get()
-                        .right()
+                return locationParsed.error()
                         .map(partial -> DataResult.<DeathRecord>error(() -> "Could not parse location: " + partial.message()))
                         .orElseThrow();
             }
@@ -97,14 +94,14 @@ public record DeathRecord(Inventory inventory,
                 experience));
     }
 
-    public CompoundTag toTag() {
+    public CompoundTag toTag(ServerPlayer player) {
         CompoundTag tag = new CompoundTag();
 
         tag.put(INVENTORY, this.inventory.save(new ListTag()));
         this.trinketsInventory.ifPresent(trinketsRecord ->
                 tag.put(TRINKETS_INVENTORY, TrinketsRecord.CODEC.encodeStart(NbtOps.INSTANCE, trinketsRecord).result().orElseThrow()));
         tag.put(TIME_OF_DEATH, ExtraCodecs.INSTANT_ISO8601.encodeStart(NbtOps.INSTANCE, this.timeOfDeath).result().orElseThrow());
-        tag.put(DEATH_MESSAGE, StringTag.valueOf(Component.Serializer.toJson(this.deathMessage)));
+        tag.put(DEATH_MESSAGE, StringTag.valueOf(Component.Serializer.toJson(this.deathMessage, player.server.registryAccess())));
         tag.put(LOCATION, GlobalPos.CODEC.encodeStart(NbtOps.INSTANCE, this.location).result().orElseThrow());
         tag.put(EXPERIENCE, IntTag.valueOf(this.experience));
 

@@ -1,6 +1,7 @@
 package red.jackf.lenientdeath.preserveitems;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
@@ -34,6 +35,7 @@ public class ItemTypeChecker {
                     case CHESTPLATE -> config.chestplates;
                     case LEGGINGS -> config.leggings;
                     case BOOTS -> config.boots;
+                    case BODY -> config.body;
                 });
             else if (item instanceof ElytraItem) result = result.and(config.elytras);
             else if (item instanceof ShieldItem) result = result.and(config.shields);
@@ -60,7 +62,7 @@ public class ItemTypeChecker {
 
         if (item instanceof BucketItem) result = result.and(config.buckets);
 
-        if (item.isEdible()) result = result.and(config.food);
+        if (stack.has(DataComponents.FOOD)) result = result.and(config.food);
 
         if (item instanceof PotionItem) result = result.and(config.potions);
 

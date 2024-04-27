@@ -47,7 +47,7 @@ public class Utilities {
             .or(LenientDeathCommand.IS_INTEGRATED_HOST_PREDICATE);
 
     private static SuggestionProvider<CommandSourceStack> createTagSuggestor(CommandBuildContext context) {
-        return (ctx, builder) -> SharedSuggestionProvider.suggestResource(context.holderLookup(Registries.ITEM).listTagIds().map(TagKey::location), builder);
+        return (ctx, builder) -> SharedSuggestionProvider.suggestResource(context.lookupOrThrow(Registries.ITEM).listTagIds().map(TagKey::location), builder);
     }
 
     public static LiteralArgumentBuilder<CommandSourceStack> createCommandNode(CommandBuildContext context) {
@@ -75,7 +75,7 @@ public class Utilities {
 
     private static int listTagItems(CommandContext<CommandSourceStack> ctx, CommandBuildContext context) {
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "tag");
-        var tag = context.holderLookup(Registries.ITEM).get(TagKey.create(Registries.ITEM, id));
+        var tag = context.lookupOrThrow(Registries.ITEM).get(TagKey.create(Registries.ITEM, id));
 
         // if valid tag
         if (tag.isPresent()) {

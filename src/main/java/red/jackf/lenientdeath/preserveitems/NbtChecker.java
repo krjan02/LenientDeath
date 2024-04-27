@@ -1,5 +1,6 @@
 package red.jackf.lenientdeath.preserveitems;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import red.jackf.lenientdeath.LenientDeath;
@@ -12,9 +13,8 @@ public class NbtChecker {
     public @Nullable Boolean shouldKeep(ItemStack stack) {
         var config = LenientDeath.CONFIG.instance().preserveItemsOnDeath.nbt;
         if (!config.enabled) return null;
-        var tag = stack.getTag();
+        var tag = stack.get(DataComponents.CUSTOM_DATA);
         if (tag == null) return null;
-        if (tag.getBoolean(config.nbtKey)) return true;
-        return null;
+        return tag.copyTag().getBoolean(config.nbtKey);
     }
 }

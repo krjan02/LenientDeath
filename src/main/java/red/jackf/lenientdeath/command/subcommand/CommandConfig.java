@@ -696,13 +696,13 @@ public class CommandConfig {
             Function<LenientDeathConfig.PreserveItemsOnDeath, List<ResourceLocation>> tagListGet) {
         var root = Commands.literal(name);
 
-        Supplier<Stream<ResourceLocation>> itemIdSupplier = () -> context.holderLookup(Registries.ITEM)
+        Supplier<Stream<ResourceLocation>> itemIdSupplier = () -> context.lookupOrThrow(Registries.ITEM)
                                                                          .listElementIds()
                                                                          .map(ResourceKey::location);
 
-        Supplier<Stream<ResourceLocation>> tagSupplier = () -> context.holderLookup(Registries.ITEM)
-                                                                         .listTagIds()
-                                                                         .map(TagKey::location);
+        Supplier<Stream<ResourceLocation>> tagSupplier = () -> context.lookupOrThrow(Registries.ITEM)
+                                                                      .listTagIds()
+                                                                      .map(TagKey::location);
 
         var items = createPreserveItemListNode(itemIdSupplier, itemListGet, "item", "items", "preserveItemsOnDeath." + name + ".items");
         var tags = createPreserveItemListNode(tagSupplier, tagListGet, "tag", "tags", "preserveItemsOnDeath." + name + ".tags");
@@ -866,6 +866,7 @@ public class CommandConfig {
         itemType.then(makeItemTypeNode("elytras", types -> types.elytras, (config, newVal) -> config.elytras = newVal));
         itemType.then(makeItemTypeNode("leggings", types -> types.leggings, (config, newVal) -> config.leggings = newVal));
         itemType.then(makeItemTypeNode("boots", types -> types.boots, (config, newVal) -> config.boots = newVal));
+        itemType.then(makeItemTypeNode("body", types -> types.body, (config, newVal) -> config.body = newVal));
         itemType.then(makeItemTypeNode("shields", types -> types.shields, (config, newVal) -> config.shields = newVal));
         itemType.then(makeItemTypeNode("otherEquippables", types -> types.otherEquippables, (config, newVal) -> config.otherEquippables = newVal));
         itemType.then(makeItemTypeNode("trinkets", types -> types.trinkets, (config, newVal) -> config.trinkets = newVal));

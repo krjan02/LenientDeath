@@ -64,7 +64,7 @@ public class RestoreInventory {
         root.put(DEATHS, list);
 
         for (DeathRecord record : deathRecords) {
-            list.add(record.toTag());
+            list.add(record.toTag(player));
         }
 
         try {

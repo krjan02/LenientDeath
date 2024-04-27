@@ -385,14 +385,14 @@ public class LenientDeathConfig implements Config<LenientDeathConfig> {
             public boolean enabled = true;
 
             @Comment("""
-                    Should helmet-type items always drop, be preserved, or fall to further processing?
+                    Should helmet-type equipment always drop, be preserved, or fall to further processing?
                     Examples: Iron Helmet, Turtle Helmet
                     Options: drop, preserve, ignore
                     Default: preserve""")
             public TypeBehavior helmets = TypeBehavior.preserve;
 
             @Comment("""
-                    Should chestplate-type items always drop, be preserved, or fall to further processing?
+                    Should chestplate-type equipment always drop, be preserved, or fall to further processing?
                     Example: Golden Chestplate
                     Options: drop, preserve, ignore
                     Default: preserve""")
@@ -406,18 +406,25 @@ public class LenientDeathConfig implements Config<LenientDeathConfig> {
             public TypeBehavior elytras = TypeBehavior.preserve;
 
             @Comment("""
-                    Should leggings-type items always drop, be preserved, or fall to further processing?
+                    Should leggings-type equipment always drop, be preserved, or fall to further processing?
                     Example: Diamond leggings
                     Options: drop, preserve, ignore
                     Default: preserve""")
             public TypeBehavior leggings = TypeBehavior.preserve;
 
             @Comment("""
-                    Should boots-type items always drop, be preserved, or fall to further processing?
+                    Should boots-type equipment always drop, be preserved, or fall to further processing?
                     Example: Chainmail boots
                     Options: drop, preserve, ignore
                     Default: preserve""")
             public TypeBehavior boots = TypeBehavior.preserve;
+
+            @Comment("""
+                    Should body-type equipment always drop, be preserved, or fall to further processing?
+                    Example: Wolf armour
+                    Options: drop, preserve, ignore
+                    Default: preserve""")
+            public TypeBehavior body = TypeBehavior.ignore;
 
             @Comment("""
                     Should shield-type items always drop, be preserved, or fall to further processing?

@@ -41,7 +41,7 @@ public class LenientDeath implements ModInitializer {
     private static @Nullable MinecraftServer currentServer = null;
 
     public static ResourceLocation id(String path) {
-        return new ResourceLocation(MODID, path);
+        return ResourceLocation.fromNamespaceAndPath(MODID, path);
     }
 
     @Override

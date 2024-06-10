@@ -462,6 +462,13 @@ public class LenientDeathConfig implements Config<LenientDeathConfig> {
             public TypeBehavior tridents = TypeBehavior.preserve;
 
             @Comment("""
+                    Should mace-type items always drop, be preserved, or fall to further processing?
+                    Example: Mace
+                    Options: drop, preserve, ignore
+                    Default: preserve""")
+            public TypeBehavior maces = TypeBehavior.preserve;
+
+            @Comment("""
                     Should bow-type items always drop, be preserved, or fall to further processing?
                     Example: Bow
                     Options: drop, preserve, ignore

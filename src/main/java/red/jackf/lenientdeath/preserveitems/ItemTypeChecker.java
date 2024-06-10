@@ -45,6 +45,7 @@ public class ItemTypeChecker {
 
         if (item instanceof SwordItem) result = result.and(config.swords);
         if (item instanceof TridentItem) result = result.and(config.tridents);
+        if (item instanceof MaceItem) result = result.and(config.maces);
 
         if (item instanceof ProjectileWeaponItem)
             if (item instanceof BowItem) result = result.and(config.bows);

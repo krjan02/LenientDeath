@@ -872,6 +872,7 @@ public class CommandConfig {
         itemType.then(makeItemTypeNode("trinkets", types -> types.trinkets, (config, newVal) -> config.trinkets = newVal));
         itemType.then(makeItemTypeNode("swords", types -> types.swords, (config, newVal) -> config.swords = newVal));
         itemType.then(makeItemTypeNode("tridents", types -> types.tridents, (config, newVal) -> config.tridents = newVal));
+        itemType.then(makeItemTypeNode("maces", types -> types.maces, (config, newVal) -> config.maces = newVal));
         itemType.then(makeItemTypeNode("bows", types -> types.bows, (config, newVal) -> config.bows = newVal));
         itemType.then(makeItemTypeNode("crossbows", types -> types.crossbows, (config, newVal) -> config.crossbows = newVal));
         itemType.then(makeItemTypeNode("otherProjectileLaunchers", types -> types.otherProjectileLaunchers, (config, newVal) -> config.otherProjectileLaunchers = newVal));

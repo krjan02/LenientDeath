@@ -3,6 +3,7 @@ package red.jackf.lenientdeath.mixins.itemresilience;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -62,9 +63,9 @@ public abstract class ItemEntityMixin extends Entity implements LDDeathDropMarka
     //////////////
 
     // prevent cactus, explosion, or tag blacklisted damages
-    @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
     private void lenientdeath$makeImmuneToDamage(
-            DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+            ServerLevel serverLevel, DamageSource source, float f, CallbackInfoReturnable<Boolean> cir) {
         if (this.isDeathDropItem) {
             var config = LenientDeath.CONFIG.instance().itemResilience;
             if (config.allDeathItemsAreCactusProof && source.is(DamageTypes.CACTUS) || config.allDeathItemsAreExplosionProof && source.is(DamageTypeTags.IS_EXPLOSION) || ItemResilience.areItemsImmuneTo(source)) {

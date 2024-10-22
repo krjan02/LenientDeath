@@ -2,6 +2,7 @@ package red.jackf.lenientdeath.preserveitems;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
@@ -13,6 +14,7 @@ import red.jackf.lenientdeath.LenientDeath;
 import red.jackf.lenientdeath.config.LenientDeathConfig;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -32,7 +34,7 @@ public class ManualAllowAndBlocklist {
     protected void setup() {
         CommonLifecycleEvents.TAGS_LOADED.register((registries, client) -> {
             if (client) return;
-            this.itemRegistry = registries.registryOrThrow(Registries.ITEM);
+            this.itemRegistry = registries.lookupOrThrow(Registries.ITEM);
             this.refreshItems();
         });
 
@@ -61,17 +63,17 @@ public class ManualAllowAndBlocklist {
         LOGGER.debug("Creating always preserved list");
 
         for (var itemId : config.alwaysPreserved.items) {
-            Item item = this.itemRegistry.get(itemId);
-            if (item == null) {
+            Optional<Holder.Reference<Item>> item = this.itemRegistry.get(itemId);
+            if (item.isEmpty()) {
                 LOGGER.warn("Unknown item ID: {}", itemId);
                 continue;
             }
             LOGGER.debug("Adding item {}", itemId);
-            this.alwaysPreserved.add(item);
+            this.alwaysPreserved.add(item.get().value());
         }
 
         for (var tagId : config.alwaysPreserved.tags) {
-            var tag = this.itemRegistry.getTag(TagKey.create(Registries.ITEM, tagId));
+            var tag = this.itemRegistry.get(TagKey.create(Registries.ITEM, tagId));
             if (tag.isEmpty()) {
                 LOGGER.warn("Unknown tag ID: {} ", tagId);
                 continue;
@@ -89,17 +91,17 @@ public class ManualAllowAndBlocklist {
         LOGGER.debug("Creating always dropped list");
 
         for (var itemId : config.alwaysDropped.items) {
-            Item item = this.itemRegistry.get(itemId);
-            if (item == null) {
+            Optional<Holder.Reference<Item>> item = this.itemRegistry.get(itemId);
+            if (item.isEmpty()) {
                 LOGGER.warn("Unknown item ID: {}", itemId);
                 continue;
             }
             LOGGER.debug("Adding item {}", itemId);
-            this.alwaysDroppedItems.add(item);
+            this.alwaysDroppedItems.add(item.get().value());
         }
 
         for (var tagId : config.alwaysDropped.tags) {
-            var tag = this.itemRegistry.getTag(TagKey.create(Registries.ITEM, tagId));
+            var tag = this.itemRegistry.get(TagKey.create(Registries.ITEM, tagId));
             if (tag.isEmpty()) {
                 LOGGER.warn("Unknown tag ID: {} ", tagId);
                 continue;

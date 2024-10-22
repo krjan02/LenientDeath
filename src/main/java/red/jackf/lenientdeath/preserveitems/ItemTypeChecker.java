@@ -4,6 +4,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import org.jetbrains.annotations.Nullable;
 import red.jackf.lenientdeath.LenientDeath;
@@ -14,10 +15,10 @@ import java.util.Set;
 
 public class ItemTypeChecker {
     public static ItemTypeChecker INSTANCE = new ItemTypeChecker();
-    private static final Set<UseAnim> OTHER_TOOLS_ANIMS = Set.of(
-            UseAnim.BRUSH,
-            UseAnim.TOOT_HORN,
-            UseAnim.SPYGLASS
+    private static final Set<ItemUseAnimation> OTHER_TOOLS_ANIMS = Set.of(
+            ItemUseAnimation.BRUSH,
+            ItemUseAnimation.TOOT_HORN,
+            ItemUseAnimation.SPYGLASS
     );
     private ItemTypeChecker() {}
 
@@ -28,18 +29,34 @@ public class ItemTypeChecker {
         Item item = stack.getItem();
         TypeBehavior result = TypeBehavior.ignore;
 
-        if (item instanceof Equipable)
-            if (item instanceof ArmorItem armor)
-                result = result.and(switch (armor.getType()) {
-                    case HELMET -> config.helmets;
-                    case CHESTPLATE -> config.chestplates;
-                    case LEGGINGS -> config.leggings;
-                    case BOOTS -> config.boots;
+        Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+        if (equippable != null) {
+            boolean specificEquipment = false;
+            if (item instanceof ArmorItem) {
+                TypeBehavior mod = switch (equippable.slot()) {
+                    case HEAD -> config.helmets;
+                    case CHEST -> config.chestplates;
+                    case LEGS -> config.leggings;
+                    case FEET -> config.boots;
                     case BODY -> config.body;
-                });
-            else if (item instanceof ElytraItem) result = result.and(config.elytras);
-            else if (item instanceof ShieldItem) result = result.and(config.shields);
-            else result = result.and(config.otherEquippables);
+                    default -> null;
+                };
+
+                if (mod != null) {
+                    result = result.and(mod);
+                    specificEquipment = true;
+                }
+            }
+            if (stack.has(DataComponents.GLIDER)) {
+                result = result.and(config.elytras);
+                specificEquipment = true;
+            }
+            if (item instanceof ShieldItem) {
+                result = result.and(config.shields);
+                specificEquipment = true;
+            }
+            if (!specificEquipment) result = result.and(config.otherEquippables);
+        }
 
         if (FabricLoader.getInstance().isModLoaded("trinkets") && TrinketsCompat.isTrinket(player, stack)) result = result.and(config.trinkets);
 

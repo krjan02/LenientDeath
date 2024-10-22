@@ -566,7 +566,8 @@ public class LenientDeathConfig implements Config<LenientDeathConfig> {
                 preserve,
                 ignore;
 
-                public TypeBehavior and(TypeBehavior other) {
+                public TypeBehavior and(@Nullable TypeBehavior other) {
+                    if (other == null) return this;
                     if (this.ordinal() > other.ordinal()) return other;
                     return this;
                 }

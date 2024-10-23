@@ -23,7 +23,8 @@ import red.jackf.lenientdeath.mixinutil.LDDeathDropMarkable;
 
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin extends Entity implements LDDeathDropMarkable {
-    @Unique private boolean isDeathDropItem = false;
+    @Unique
+    private boolean isDeathDropItem = false;
 
     public ItemEntityMixin(EntityType<?> entityType, Level level) {
         super(entityType, level);
@@ -42,19 +43,19 @@ public abstract class ItemEntityMixin extends Entity implements LDDeathDropMarka
 
     // read grounded position
     @Inject(method = "readAdditionalSaveData(Lnet/minecraft/nbt/CompoundTag;)V", at = @At("RETURN"))
-    private void lenientdeath$readModData(CompoundTag tag, CallbackInfo ci) {
+    private void loadDeathDropMark(CompoundTag tag, CallbackInfo ci) {
         this.isDeathDropItem = tag.getBoolean(IS_DEATH_DROP_ITEM);
     }
 
     // save grounded position
     @Inject(method = "addAdditionalSaveData(Lnet/minecraft/nbt/CompoundTag;)V", at = @At("RETURN"))
-    private void lenientdeath$addModData(CompoundTag tag, CallbackInfo ci) {
+    private void saveDeathDropMark(CompoundTag tag, CallbackInfo ci) {
         tag.putBoolean(IS_DEATH_DROP_ITEM, this.isDeathDropItem);
     }
 
     // dont merge non-death drop item with death drop item
     @ModifyExpressionValue(method = "tryToMerge(Lnet/minecraft/world/entity/item/ItemEntity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;areMergable(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z"))
-    private boolean lenientdeath$onlyMergeIfBothDeathDrops(boolean original, ItemEntity other) {
+    private boolean onlyMergeIfDeathDropMarksMatch(boolean original, ItemEntity other) {
         return original && this.isDeathDropItem == ((LDDeathDropMarkable) other).lenientdeath$isDeathDropItem();
     }
 
@@ -64,7 +65,7 @@ public abstract class ItemEntityMixin extends Entity implements LDDeathDropMarka
 
     // prevent cactus, explosion, or tag blacklisted damages
     @Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
-    private void lenientdeath$makeImmuneToDamage(
+    private void makeImmuneToDamage(
             ServerLevel serverLevel, DamageSource source, float f, CallbackInfoReturnable<Boolean> cir) {
         if (this.isDeathDropItem) {
             var config = LenientDeath.CONFIG.instance().itemResilience;
@@ -76,7 +77,7 @@ public abstract class ItemEntityMixin extends Entity implements LDDeathDropMarka
 
     // prevent fire damage
     @ModifyReturnValue(method = "fireImmune()Z", at = @At("RETURN"))
-    private boolean lenientdeath$forceFireImmuneIfNeeded(boolean original) {
+    private boolean forceFireImmuneIfNeeded(boolean original) {
         return this.isDeathDropItem && LenientDeath.CONFIG.instance().itemResilience.allDeathItemsAreFireProof || original;
     }
 }

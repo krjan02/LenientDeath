@@ -1,6 +1,9 @@
 package red.jackf.lenientdeath.mixins.itemresilience;
 
 import com.llamalad7.mixinextras.injector.ModifyReceiver;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -11,8 +14,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -61,13 +67,31 @@ public abstract class ServerPlayerMixin extends Player implements LDGroundedPosH
 
     // add death source for future calls
     @Inject(method = "die", at = @At("HEAD"))
-    private void lenientdeath$rememberDeathSourceAndPossiblyAnnounce(DamageSource damageSource, CallbackInfo ci) {
+    private void addDeathContext(DamageSource damageSource, CallbackInfo ci) {
         this.deathContext = new DeathContext(damageSource);
     }
 
     @Override
     public @Nullable DeathContext lenientdeath$getDeathContext() {
         return deathContext;
+    }
+
+    // read grounded position
+    @Inject(method = "readAdditionalSaveData(Lnet/minecraft/nbt/CompoundTag;)V", at = @At("RETURN"))
+    private void loadGroundedPos(CompoundTag tag, CallbackInfo ci) {
+        if (tag.contains(LAST_GROUNDED_POS, Tag.TAG_COMPOUND))
+            this.lastGroundedPos = GlobalPos.CODEC.parse(NbtOps.INSTANCE, tag.getCompound(LAST_GROUNDED_POS))
+                    .resultOrPartial(LenientDeath.LOGGER::error)
+                    .orElse(null);
+    }
+
+    // save grounded position
+    @Inject(method = "addAdditionalSaveData(Lnet/minecraft/nbt/CompoundTag;)V", at = @At("RETURN"))
+    private void saveGroundedPos(CompoundTag tag, CallbackInfo ci) {
+        if (this.lastGroundedPos != null)
+            GlobalPos.CODEC.encodeStart(NbtOps.INSTANCE, this.lastGroundedPos)
+                    .resultOrPartial(LenientDeath.LOGGER::error)
+                    .ifPresent(encoded -> tag.put(LAST_GROUNDED_POS, encoded));
     }
 
     // change added dimension if not the same
@@ -85,21 +109,24 @@ public abstract class ServerPlayerMixin extends Player implements LDGroundedPosH
         return original;
     }
 
-    // read grounded position
-    @Inject(method = "readAdditionalSaveData(Lnet/minecraft/nbt/CompoundTag;)V", at = @At("RETURN"))
-    private void lenientdeath$readModData(CompoundTag tag, CallbackInfo ci) {
-        if (tag.contains(LAST_GROUNDED_POS, Tag.TAG_COMPOUND))
-            this.lastGroundedPos = GlobalPos.CODEC.parse(NbtOps.INSTANCE, tag.getCompound(LAST_GROUNDED_POS))
-                                                  .resultOrPartial(LenientDeath.LOGGER::error)
-                                                  .orElse(null);
+    @WrapOperation(method = "createItemStackToDrop", at = @At(value = "NEW", target = "(Lnet/minecraft/world/level/Level;DDDLnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"))
+    private ItemEntity spawnDeathItemAtDifferentPosition(Level level, double posX, double posY, double posZ, ItemStack itemStack, Operation<ItemEntity> original) {
+        ItemEntity item = ItemResilience.ifHandledVoidDeath(this, (deathContext, groundPos, player) -> {
+            Vec3 pos = groundPos.pos().getCenter();
+            return original.call(this.server.getLevel(groundPos.dimension()), pos.x(), pos.y() + 1, pos.z(), itemStack);
+        });
+
+        if (item == null) item = original.call(level, posX, posY, posZ, itemStack);
+
+        return item;
     }
 
-    // save grounded position
-    @Inject(method = "addAdditionalSaveData(Lnet/minecraft/nbt/CompoundTag;)V", at = @At("RETURN"))
-    private void lenientdeath$addModData(CompoundTag tag, CallbackInfo ci) {
-        if (this.lastGroundedPos != null)
-            GlobalPos.CODEC.encodeStart(NbtOps.INSTANCE, this.lastGroundedPos)
-                           .resultOrPartial(LenientDeath.LOGGER::error)
-                           .ifPresent(encoded -> tag.put(LAST_GROUNDED_POS, encoded));
+    @ModifyReturnValue(method = "createItemStackToDrop", at = @At("RETURN"))
+    private ItemEntity killDeathItemVelocity(ItemEntity original) {
+        ItemResilience.ifHandledVoidDeath(this, (deathContext, groundPos, player) -> {
+            if (original != null) original.setDeltaMovement(Vec3.ZERO);
+            return null;
+        });
+        return original;
     }
 }

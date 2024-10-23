@@ -9,7 +9,6 @@
     "restoreinventory.ServerPlayerMixin",
     "itemlifeextender.ItemEntityAccessor",
     "itemresilience.ItemEntityMixin",
-    "itemresilience.PlayerMixin",
     "itemresilience.ServerPlayerMixin",
     "movetooriginalslots.InventoryAccessor",
     "movetooriginalslots.ItemEntityMixin",

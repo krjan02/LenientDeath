@@ -38,10 +38,12 @@ public class InventoryMixin {
     private boolean onlyDropIfNotSafe(ItemStack stack, Operation<Boolean> original, @Share("ldSlotCount") LocalIntRef slot) {
         if (!(this.player instanceof ServerPlayer deadPlayer)) return original.call(stack);
 
+        if (ItemResilience.shouldForceKeep(deadPlayer)) return true;
+
         int preserved = LenientDeathAPI.INSTANCE.howManyToPreserve(deadPlayer, stack);
         if (preserved == 0) {
             return original.call(stack);
-        } else if (preserved == stack.getCount() || ItemResilience.shouldForceKeep(deadPlayer)) {
+        } else if (preserved == stack.getCount()) {
             return true;
         } else {
             ItemStack dropped = stack.split(stack.getCount() - preserved);

@@ -433,7 +433,7 @@ public class CommandConfig {
         ));
 
         root.then(makeVoidRecoveryNode());
-
+        
         return root;
     }
 
@@ -459,6 +459,7 @@ public class CommandConfig {
 
         return root;
     }
+
 
     private static LiteralArgumentBuilder<CommandSourceStack> createPresetsNode() {
         var root = Commands.literal("presets");

@@ -40,7 +40,12 @@ public class ItemResilience {
             var groundedPos = groundedPosHolder.lenientdeath$getLastGroundedPosition();
 
             //If the groundedPos is not valid (e.g Air or Lava) then find a safe block.
-            if(!ClosestSafeBlock.isValidPosition(serverPlayer.serverLevel(),groundedPos.pos())) {
+            if(!ClosestSafeBlock.isValidPosition(serverPlayer.serverLevel(),groundedPos.pos()))
+            {
+                //If there is no LastGroundedPosition or if the groundedPos is too far away from the death location, use the actual player location
+                if(groundedPos == null || groundedPos.pos().distSqr(serverPlayer.getOnPos()) >= 30)
+                    groundedPos = GlobalPos.of(serverPlayer.serverLevel().dimension(), serverPlayer.getOnPos());
+
                 groundedPos = ClosestSafeBlock.find(serverPlayer.serverLevel(),groundedPos);
             }
 
@@ -61,8 +66,8 @@ public class ItemResilience {
             var ctx = deathContextHolder.lenientdeath$getDeathContext();
             var groundedPos = groundedPosHolder.lenientdeath$getLastGroundedPosition();
 
-            //If there is no LastGroundedPosition use the actual player location
-            if(groundedPos == null)
+            //If there is no LastGroundedPosition or if the groundedPos is too far away from the death location, use the actual player location
+            if(groundedPos == null || groundedPos.pos().distSqr(serverPlayer.getOnPos()) >= 30)
                 groundedPos = GlobalPos.of(serverPlayer.serverLevel().dimension(), serverPlayer.getOnPos());
 
             //Determine the closet safe block

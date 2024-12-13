@@ -43,7 +43,7 @@ public class ItemResilience {
             if(!ClosestSafeBlock.isValidPosition(serverPlayer.serverLevel(),groundedPos.pos()))
             {
                 //If there is no LastGroundedPosition or if the groundedPos is too far away from the death location, use the actual player location
-                if(groundedPos == null || groundedPos.pos().distSqr(serverPlayer.getOnPos()) >= 30)
+                if(groundedPos == null || groundedPos.pos().distSqr(serverPlayer.getOnPos()) >= 100)
                     groundedPos = GlobalPos.of(serverPlayer.serverLevel().dimension(), serverPlayer.getOnPos());
 
                 groundedPos = ClosestSafeBlock.find(serverPlayer.serverLevel(),groundedPos);
